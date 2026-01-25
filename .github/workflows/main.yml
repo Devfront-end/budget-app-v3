@@ -38,6 +38,9 @@ jobs:
         run: |
           cd frontend
           npm run build
+        env:
+          NODE_ENV: production
+          VITE_API_URL: https://your-backend-api.com/api/v1
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
