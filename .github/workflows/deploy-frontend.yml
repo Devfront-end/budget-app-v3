@@ -6,8 +6,20 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +32,9 @@ jobs:
         node-version: '18'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
 
     - name: Install dependencies
       run: |
@@ -34,10 +49,11 @@ jobs:
         NODE_ENV: production
         VITE_API_URL: https://your-backend-api.com/api/v1
 
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./frontend/dist
-        cname: devfront-end.github.io
+        path: ./frontend/dist
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
