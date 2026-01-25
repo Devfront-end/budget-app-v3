@@ -34,10 +34,12 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Build
+    - name: Build
         run: |
           cd frontend
           npm run build
+        env:
+          NODE_ENV: production
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
