@@ -1,0 +1,265 @@
+// Prisma schema for Smart Budget application
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  username          String    @unique
+  password          String    // bcrypt hashed
+  firstName         String?
+  lastName          String?
+  isEmailVerified   Boolean   @default(false)
+  emailVerifyToken  String?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  twoFactorSecret   String?   // encrypted
+  twoFactorEnabled  Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLogin         DateTime?
+  isActive          Boolean   @default(true)
+  
+  // Relations
+  transactions      Transaction[]
+  bankAccounts      BankAccount[]
+  categories        Category[]
+  subscriptions     Subscription[]
+  wishlistItems     WishlistItem[]
+  paymentPlans      PaymentPlan[]
+  budgets           Budget[]
+  auditLogs         AuditLog[]
+  adminProfile      Admin?
+  
+  @@map("users")
+  @@index([email])
+  @@index([username])
+}
+
+model Transaction {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            TransactionType
+  amount          Decimal   @db.Decimal(10, 2)
+  description     String
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  date            DateTime
+  merchant        String?
+  merchantLogo    String?
+  location        Json?     // { lat, lng, address }
+  tags            String[]
+  receiptUrl      String?
+  isRecurring     Boolean   @default(false)
+  recurringPlanId String?
+  bankAccountId   String?
+  bankAccount     BankAccount? @relation(fields: [bankAccountId], references: [id])
+  isEncrypted     Boolean   @default(false)
+  encryptedData   String?   // For E2EE
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([userId, date])
+  @@index([categoryId])
+  @@index([type])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model Category {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  type          TransactionType
+  color         String        @default("#667eea")
+  icon          String?
+  budget        Decimal?      @db.Decimal(10, 2)
+  isDefault     Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  
+  transactions  Transaction[]
+  
+  @@unique([userId, name, type])
+  @@map("categories")
+}
+
+model BankAccount {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  type            AccountType
+  bankName        String
+  accountNumber   String    // encrypted
+  balance         Decimal   @db.Decimal(10, 2)
+  currency        String    @default("EUR")
+  isSynced        Boolean   @default(false)
+  apiConnectionId String?
+  lastSyncDate    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  transactions    Transaction[]
+  
+  @@map("bank_accounts")
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  INVESTMENT
+  LOAN
+  CREDIT_CARD
+}
+
+model Subscription {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  category        String
+  amount          Decimal   @db.Decimal(10, 2)
+  frequency       SubscriptionFrequency
+  nextRenewal     DateTime
+  paymentMethod   String?
+  logo            String?
+  isActive        Boolean   @default(true)
+  autoRenewal     Boolean   @default(true)
+  notifyBefore    Int       @default(7) // days
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("subscriptions")
+}
+
+enum SubscriptionFrequency {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model WishlistItem {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  targetAmount    Decimal   @db.Decimal(10, 2)
+  currentSavings  Decimal   @db.Decimal(10, 2) @default(0)
+  category        String
+  priority        Int       @default(0)
+  imageUrl        String?
+  targetDate      DateTime?
+  isAchieved      Boolean   @default(false)
+  achievedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  savingsHistory  SavingsEntry[]
+  
+  @@map("wishlist_items")
+}
+
+model SavingsEntry {
+  id          String        @id @default(uuid())
+  wishlistId  String
+  wishlist    WishlistItem  @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  amount      Decimal       @db.Decimal(10, 2)
+  note        String?
+  createdAt   DateTime      @default(now())
+  
+  @@map("savings_entries")
+}
+
+model PaymentPlan {
+  id                String    @id @default(uuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  merchantName      String
+  totalAmount       Decimal   @db.Decimal(10, 2)
+  numberOfPayments  Int       @default(4)
+  paidAmount        Decimal   @db.Decimal(10, 2) @default(0)
+  purchaseDate      DateTime
+  paymentMethod     String
+  nextPaymentDate   DateTime
+  isCompleted       Boolean   @default(false)
+  archived          Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  payments          Payment[]
+  
+  @@map("payment_plans")
+}
+
+model Payment {
+  id          String      @id @default(uuid())
+  planId      String
+  plan        PaymentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  amount      Decimal     @db.Decimal(10, 2)
+  dueDate     DateTime
+  paidDate    DateTime?
+  isPaid      Boolean     @default(false)
+  
+  @@map("payments")
+}
+
+model Budget {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month       String    // Format: YYYY-MM
+  totalIncome Decimal   @db.Decimal(10, 2)
+  totalExpense Decimal  @db.Decimal(10, 2)
+  categories  Json      // { categoryId: budgetAmount }
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@unique([userId, month])
+  @@map("budgets")
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String
+  resource    String
+  resourceId  String?
+  ipAddress   String?
+  userAgent   String?
+  details     Json?
+  createdAt   DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Admin {
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      AdminRole
+  createdAt DateTime  @default(now())
+  
+  @@map("admins")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+}
