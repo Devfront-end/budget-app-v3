@@ -288,8 +288,8 @@ export class BudgetController {
 
         return {
           categoryId,
-          budgeted: budgeted,
-          actual: actual,
+          budgeted,
+          actual,
           remaining: budgeted - actual,
           percentage: Math.round(percentage * 100) / 100,
           status: percentage > 100 ? 'over' : percentage > 80 ? 'warning' : 'good',

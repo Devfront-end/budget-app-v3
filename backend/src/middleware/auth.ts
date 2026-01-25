@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request as ExpressRequest, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../config/database';
 
@@ -8,6 +8,7 @@ interface JwtPayload {
 }
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: {
@@ -19,7 +20,7 @@ declare global {
 }
 
 export const authenticateJWT = async (
-  req: Request,
+  req: ExpressRequest,
   res: Response,
   next: NextFunction
 ) => {

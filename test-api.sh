@@ -52,7 +52,7 @@ fi
 
 echo ""
 echo "3️⃣  Test d'accès avec token..."
-DASHBOARD_RESPONSE=$(curl -s -X GET "$API/dashboard" \
+DASHBOARD_RESPONSE=$(curl -s -X GET "$API/dashboard/summary" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Origin: http://localhost")
 
