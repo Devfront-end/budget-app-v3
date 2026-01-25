@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { budgetService, Budget, BudgetProgress, CreateBudgetData } from '@/services/budgetService';
 import { categoryService } from '@/services/categoryService';
@@ -21,10 +21,8 @@ function Budgets() {
 
   const {
     register,
-    control,
     handleSubmit,
     reset,
-    watch,
     formState: { errors },
   } = useForm<CreateBudgetData>({
     defaultValues: {
@@ -33,11 +31,6 @@ function Budgets() {
       totalExpense: 0,
       categories: {},
     },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'categories',
   });
 
   useEffect(() => {
@@ -70,14 +63,8 @@ function Budgets() {
   const onSubmit = async (data: CreateBudgetData) => {
     setIsLoading(true);
     try {
-      // Convert categories array to object
-      const categoriesObject: { [key: string]: number } = {};
-      data.categories.forEach((cat: any) => {
-        if (cat.categoryId && cat.amount) {
-          categoriesObject[cat.categoryId] = parseFloat(cat.amount);
-        }
-      });
-      data.categories = categoriesObject;
+      // categories is already an object { [key: string]: number }
+      // No need to convert from array
 
       const response = await budgetService.createBudget(data);
       if (response.success) {
@@ -197,52 +184,12 @@ function Budgets() {
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Budgets par Catégorie
-                </label>
-                <button
-                  type="button"
-                  onClick={() => append({ categoryId: '', amount: 0 })}
-                  className="text-sm text-blue-600 hover:text-blue-800"
-                >
-                  + Ajouter Catégorie
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="flex gap-2 items-center">
-                    <select
-                      {...register(`categories.${index}.categoryId` as const)}
-                      className="input flex-1"
-                    >
-                      <option value="">Sélectionner une catégorie</option>
-                      {categories.map(category => (
-                        <option key={category.id} value={category.id}>
-                          {category.icon} {category.name}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      {...register(`categories.${index}.amount` as const, {
-                        min: { value: 0, message: 'Doit être positif' }
-                      })}
-                      type="number"
-                      step="0.01"
-                      placeholder="Montant"
-                      className="input w-32"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => remove(index)}
-                      className="text-red-600 hover:text-red-800 p-2"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Budgets par Catégorie (optionnel)
+              </label>
+              <p className="text-sm text-gray-500 mb-4">
+                Vous pourrez ajouter des catégories après la création du budget
+              </p>
             </div>
 
             <div className="flex gap-2">
