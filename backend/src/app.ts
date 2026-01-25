@@ -13,6 +13,7 @@ import bankAccountRoutes from './routes/bankAccount.routes';
 import subscriptionRoutes from './routes/subscription.routes';
 import wishlistRoutes from './routes/wishlist.routes';
 import paymentPlanRoutes from './routes/paymentPlan.routes';
+import budgetRoutes from './routes/budget.routes';
 import analyticsRoutes from './routes/analytics.routes';
 
 dotenv.config();
@@ -54,6 +55,7 @@ app.use(`${API_PREFIX}/bank-accounts`, bankAccountRoutes);
 app.use(`${API_PREFIX}/subscriptions`, subscriptionRoutes);
 app.use(`${API_PREFIX}/wishlist`, wishlistRoutes);
 app.use(`${API_PREFIX}/payment-plans`, paymentPlanRoutes);
+app.use(`${API_PREFIX}/budgets`, budgetRoutes);
 app.use(`${API_PREFIX}/analytics`, analyticsRoutes);
 
 // 404 handler

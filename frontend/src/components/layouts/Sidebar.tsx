@@ -8,11 +8,13 @@ import {
   HeartIcon,
   ClipboardDocumentListIcon,
   ChartBarIcon,
+  CalculatorIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
   { name: 'Dashboard', to: '/', icon: HomeIcon },
   { name: 'Transactions', to: '/transactions', icon: CreditCardIcon },
+  { name: 'Budgets', to: '/budgets', icon: CalculatorIcon },
   { name: 'Catégories', to: '/categories', icon: TagIcon },
   { name: 'Comptes bancaires', to: '/bank-accounts', icon: BanknotesIcon },
   { name: 'Abonnements', to: '/subscriptions', icon: ArrowPathIcon },
