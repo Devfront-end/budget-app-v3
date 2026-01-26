@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { dashboardService } from '../services/dashboardService';
 import {
   BalanceCard,
   GlassCard,
@@ -19,20 +20,40 @@ function Dashboard() {
   const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
-    // Simuler le chargement des données
-    setTimeout(() => {
-      setBalance(5847.32);
-      setIncome(3200.00);
-      setExpenses(1547.20);
-      setTransactions([
-        { id: 1, icon: '🛒', title: 'Carrefour', date: 'Aujourd\'hui, 14:30', amount: 47.32, type: 'EXPENSE', color: '#F43F5E' },
-        { id: 2, icon: '💰', title: 'Salaire', date: 'Hier, 09:00', amount: 3200.00, type: 'INCOME', color: '#10B981' },
-        { id: 3, icon: '☕', title: 'Starbucks', date: 'Hier, 08:15', amount: 5.90, type: 'EXPENSE', color: '#F43F5E' },
-        { id: 4, icon: '🎬', title: 'Netflix', date: '28 Jan', amount: 13.99, type: 'EXPENSE', color: '#F43F5E' },
-        { id: 5, icon: '⛽', title: 'Shell', date: '27 Jan', amount: 65.00, type: 'EXPENSE', color: '#F43F5E' },
-      ]);
-      setLoading(false);
-    }, 1000);
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const [summaryData, transactionsData] = await Promise.all([
+          dashboardService.getSummary('month'),
+          dashboardService.getRecentTransactions(5)
+        ]);
+
+        if (summaryData.success && summaryData.data.summary) {
+          setBalance(summaryData.data.summary.balance);
+          setIncome(summaryData.data.summary.totalIncome);
+          setExpenses(summaryData.data.summary.totalExpense);
+        }
+
+        if (transactionsData.success && transactionsData.data.transactions) {
+          // Map API transactions to UI format if necessary
+          setTransactions(transactionsData.data.transactions.map((t: any) => ({
+            id: t.id,
+            icon: t.category?.icon || '💸', // Default icon if missing
+            title: t.description,
+            date: new Date(t.date).toLocaleDateString(),
+            amount: Number(t.amount),
+            type: t.type,
+            color: t.category?.color || '#cbd5e1'
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   const container = {
@@ -73,7 +94,7 @@ function Dashboard() {
           className="mb-8"
         >
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-            Bonjour Jules 👋
+            Bonjour 👋
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">Voici votre résumé financier</p>
         </motion.div>

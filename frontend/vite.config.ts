@@ -31,7 +31,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: process.env.NODE_ENV === 'production' ? '/budget-app-v3/' : '/',
+  base: '/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

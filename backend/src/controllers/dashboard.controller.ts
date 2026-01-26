@@ -10,7 +10,8 @@ export class DashboardController {
 
       // Define date range based on period
       const targetDate = new Date(date as string);
-      let startDate, endDate;
+      let startDate;
+      let endDate;
 
       if (period === 'month') {
         startDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
