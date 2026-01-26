@@ -286,13 +286,17 @@ export class BudgetController {
         const budgeted = Number(budgetedAmount);
         const percentage = budgeted > 0 ? (actual / budgeted) * 100 : 0;
 
+        let status = 'good';
+        if (percentage > 100) status = 'over';
+        else if (percentage > 80) status = 'warning';
+
         return {
           categoryId,
           budgeted,
           actual,
           remaining: budgeted - actual,
           percentage: Math.round(percentage * 100) / 100,
-          status: percentage > 100 ? 'over' : percentage > 80 ? 'warning' : 'good',
+          status,
         };
       });
 

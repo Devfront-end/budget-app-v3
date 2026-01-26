@@ -40,7 +40,7 @@ export class AuthController {
       // Hash password
       const hashedPassword = await bcrypt.hash(
         password,
-        parseInt(process.env.BCRYPT_ROUNDS || '12')
+        parseInt(process.env.BCRYPT_ROUNDS || '12', 10)
       );
 
       // Create user

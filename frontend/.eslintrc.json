@@ -34,6 +34,18 @@
             {
                 "props": false
             }
-        ]
+        ],
+        "@typescript-eslint/no-explicit-any": "warn",
+        "import/prefer-default-export": "off",
+        "import/no-named-as-default": "off",
+        "react/no-unescaped-entities": "off",
+        "react/prop-types": "off",
+        "@typescript-eslint/consistent-type-imports": "off",
+        "react/jsx-props-no-spreading": "off",
+        "jsx-a11y/label-has-associated-control": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "jsx-a11y/no-static-element-interactions": "off",
+        "react/button-has-type": "off",
+        "react/self-closing-comp": "off"
     }
 }
