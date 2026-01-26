@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { dashboardService } from '../services/dashboardService';
+import { transactionService } from '../services/transactionService';
 import {
   BalanceCard,
   GlassCard,
@@ -9,6 +10,16 @@ import {
   StatsCard,
   SkeletonCard,
 } from '../components/ui/PremiumComponents';
+import {
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  BanknotesIcon,
+  PlusIcon,
+  ChartBarIcon,
+  CreditCardIcon,
+  TrophyIcon,
+  ClockIcon
+} from '@heroicons/react/24/outline';
 import { AddTransactionModal } from '../components/features/AddTransactionModal';
 
 function Dashboard() {
@@ -18,43 +29,66 @@ function Dashboard() {
   const [expenses, setExpenses] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<any>(null);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [summaryData, transactionsData] = await Promise.all([
+        dashboardService.getSummary('month'),
+        dashboardService.getRecentTransactions(5)
+      ]);
+
+      if (summaryData.success && summaryData.data.summary) {
+        setBalance(summaryData.data.summary.balance);
+        setIncome(summaryData.data.summary.totalIncome);
+        setExpenses(summaryData.data.summary.totalExpense);
+      }
+
+      if (transactionsData.success && transactionsData.data.transactions) {
+        setTransactions(transactionsData.data.transactions.map((t: any) => ({
+          id: t.id,
+          icon: t.category?.icon || '💸',
+          title: t.description,
+          date: new Date(t.date).toLocaleDateString(),
+          amount: Number(t.amount),
+          type: t.type,
+          color: t.category?.color || '#cbd5e1',
+          categoryId: t.categoryId,
+          bankAccountId: t.bankAccountId,
+          description: t.description,
+        })));
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const [summaryData, transactionsData] = await Promise.all([
-          dashboardService.getSummary('month'),
-          dashboardService.getRecentTransactions(5)
-        ]);
-
-        if (summaryData.success && summaryData.data.summary) {
-          setBalance(summaryData.data.summary.balance);
-          setIncome(summaryData.data.summary.totalIncome);
-          setExpenses(summaryData.data.summary.totalExpense);
-        }
-
-        if (transactionsData.success && transactionsData.data.transactions) {
-          // Map API transactions to UI format if necessary
-          setTransactions(transactionsData.data.transactions.map((t: any) => ({
-            id: t.id,
-            icon: t.category?.icon || '💸', // Default icon if missing
-            title: t.description,
-            date: new Date(t.date).toLocaleDateString(),
-            amount: Number(t.amount),
-            type: t.type,
-            color: t.category?.color || '#cbd5e1'
-          })));
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDashboardData();
   }, []);
+
+  const handleEdit = (transaction: any) => {
+    setEditingTransaction({
+      ...transaction,
+      date: new Date().toISOString()
+    });
+    setShowAddModal(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette transaction ?')) {
+      try {
+        await transactionService.delete(id);
+        fetchDashboardData();
+      } catch (error) {
+        console.error('Failed to delete transaction:', error);
+        alert('Erreur lors de la suppression');
+      }
+    }
+  };
 
   const container = {
     hidden: { opacity: 0 },
@@ -114,7 +148,7 @@ function Dashboard() {
               title="Revenus ce mois"
               value={income.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
               change={12.5}
-              icon="💰"
+              icon={<ArrowTrendingUpIcon className="w-8 h-8" />}
             />
           </motion.div>
           <motion.div variants={item}>
@@ -122,7 +156,7 @@ function Dashboard() {
               title="Dépenses ce mois"
               value={expenses.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
               change={-5.2}
-              icon="💸"
+              icon={<ArrowTrendingDownIcon className="w-8 h-8" />}
             />
           </motion.div>
           <motion.div variants={item}>
@@ -130,7 +164,7 @@ function Dashboard() {
               title="Économies"
               value={(income - expenses).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
               change={8.3}
-              icon="🎯"
+              icon={<BanknotesIcon className="w-8 h-8" />}
             />
           </motion.div>
         </motion.div>
@@ -139,24 +173,32 @@ function Dashboard() {
         <GlassCard className="mb-8">
           <h2 className="text-xl font-bold mb-6">Actions rapides</h2>
           <div className="flex gap-6 justify-around">
-            <FABButton icon="➕" label="Ajouter" onClick={() => setShowAddModal(true)} />
-            <FABButton icon="📊" label="Statistiques" onClick={() => alert('Voir stats')} variant="success" />
-            <FABButton icon="💳" label="Comptes" onClick={() => alert('Voir comptes')} />
-            <FABButton icon="🎯" label="Objectifs" onClick={() => alert('Voir objectifs')} />
+            <FABButton icon={<PlusIcon className="w-8 h-8" />} label="Ajouter" onClick={() => { setEditingTransaction(null); setShowAddModal(true); }} />
+            <FABButton icon={<ChartBarIcon className="w-8 h-8" />} label="Statistiques" onClick={() => alert('Voir stats')} variant="success" />
+            <FABButton icon={<CreditCardIcon className="w-8 h-8" />} label="Comptes" onClick={() => alert('Voir comptes')} />
+            <FABButton icon={<TrophyIcon className="w-8 h-8" />} label="Objectifs" onClick={() => alert('Voir objectifs')} />
           </div>
         </GlassCard>
 
         {/* Recent Transactions */}
         <GlassCard>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">Transactions récentes</h2>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <ClockIcon className="w-6 h-6 text-primary-600" />
+              Transactions récentes
+            </h2>
             <button className="text-primary-600 hover:text-primary-700 font-medium text-sm">
               Voir tout →
             </button>
           </div>
           <div className="space-y-3">
             {transactions.map((transaction) => (
-              <TransactionItem key={transaction.id} {...transaction} />
+              <TransactionItem
+                key={transaction.id}
+                {...transaction}
+                onEdit={() => handleEdit(transaction)}
+                onDelete={() => handleDelete(transaction.id)}
+              />
             ))}
           </div>
         </GlassCard>
@@ -166,9 +208,9 @@ function Dashboard() {
       <AddTransactionModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
+        transaction={editingTransaction}
         onSuccess={() => {
-          // Recharger les données après ajout
-          console.log('Transaction ajoutée avec succès !');
+          fetchDashboardData();
         }}
       />
     </div>

@@ -7,9 +7,10 @@ interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  transaction?: any; // Transaction à modifier (optionnel)
 }
 
-export const AddTransactionModal = ({ isOpen, onClose, onSuccess }: AddTransactionModalProps) => {
+export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }: AddTransactionModalProps) => {
   const [formData, setFormData] = useState({
     amount: '',
     type: 'EXPENSE' as 'INCOME' | 'EXPENSE',
@@ -26,8 +27,29 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess }: AddTransacti
   useEffect(() => {
     if (isOpen) {
       loadCategoriesAndAccounts();
+      if (transaction) {
+        // Pré-remplir le formulaire pour modification
+        setFormData({
+          amount: transaction.amount.toString(),
+          type: transaction.type,
+          description: transaction.description,
+          categoryId: transaction.categoryId || '',
+          bankAccountId: transaction.bankAccountId || '',
+          date: new Date(transaction.date).toISOString().split('T')[0],
+        });
+      } else {
+        // Reset pour nouvelle transaction
+        setFormData({
+          amount: '',
+          type: 'EXPENSE',
+          description: '',
+          categoryId: '',
+          bankAccountId: '',
+          date: new Date().toISOString().split('T')[0],
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, transaction]);
 
   const loadCategoriesAndAccounts = async () => {
     try {
@@ -61,29 +83,27 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess }: AddTransacti
     setLoading(true);
 
     try {
-      await transactionService.create({
+      const data = {
         ...formData,
         amount: parseFloat(formData.amount),
         categoryId: formData.categoryId || null,
         bankAccountId: formData.bankAccountId || null,
-      });
+      };
+
+      if (transaction) {
+        await transactionService.update(transaction.id, data);
+      } else {
+        await transactionService.create(data);
+      }
 
       // Succès
       onSuccess?.();
       onClose();
 
-      // Reset form
-      setFormData({
-        amount: '',
-        type: 'EXPENSE',
-        description: '',
-        categoryId: '',
-        bankAccountId: '',
-        date: new Date().toISOString().split('T')[0],
-      });
+      // Reset form handled by useEffect
     } catch (error: any) {
-      console.error('Erreur création transaction:', error);
-      setError(error.response?.data?.error?.message || 'Erreur lors de la création de la transaction');
+      console.error('Erreur sauvegarde transaction:', error);
+      setError(error.response?.data?.error?.message || 'Erreur lors de la sauvegarde');
     } finally {
       setLoading(false);
     }
@@ -95,7 +115,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess }: AddTransacti
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Nouvelle Transaction">
+    <Modal isOpen={isOpen} onClose={onClose} title={transaction ? "Modifier Transaction" : "Nouvelle Transaction"}>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Erreur */}
         {error && (
@@ -114,8 +134,8 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess }: AddTransacti
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, type: 'EXPENSE' }))}
               className={`py-3 px-4 rounded-2xl font-medium transition-all ${formData.type === 'EXPENSE'
-                  ? 'bg-gradient-to-r from-danger-500 to-danger-600 text-white shadow-lg'
-                  : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800'
+                ? 'bg-gradient-to-r from-danger-500 to-danger-600 text-white shadow-lg'
+                : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800'
                 }`}
             >
               💸 Dépense
@@ -124,8 +144,8 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess }: AddTransacti
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, type: 'INCOME' }))}
               className={`py-3 px-4 rounded-2xl font-medium transition-all ${formData.type === 'INCOME'
-                  ? 'bg-gradient-to-r from-success-500 to-success-600 text-white shadow-lg'
-                  : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800'
+                ? 'bg-gradient-to-r from-success-500 to-success-600 text-white shadow-lg'
+                : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800'
                 }`}
             >
               💰 Revenu
@@ -241,7 +261,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess }: AddTransacti
             disabled={loading}
             className={`flex-1 ${formData.type === 'INCOME' ? 'btn-success' : 'btn-danger'}`}
           >
-            {loading ? 'Enregistrement...' : 'Ajouter'}
+            {loading ? 'Enregistrement...' : (transaction ? 'Sauvegarder' : 'Ajouter')}
           </button>
         </div>
       </form>

@@ -1,6 +1,8 @@
 // Premium UI Components
 import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, Fragment } from 'react';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import { Menu, Transition } from '@headlessui/react';
 
 // Balance Card - Credit Card Style
 export const BalanceCard = ({ balance, className = '' }: { balance: number; className?: string }) => {
@@ -65,19 +67,21 @@ export const FABButton = ({ icon, label, onClick, variant = 'primary' }: {
 };
 
 // Transaction Item
-export const TransactionItem = ({ icon, title, date, amount, type, color }: {
+export const TransactionItem = ({ icon, title, date, amount, type, color, onEdit, onDelete }: {
   icon: string;
   title: string;
   date: string;
   amount: number;
   type: 'INCOME' | 'EXPENSE';
   color?: string;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="transaction-item"
+      className="transaction-item group relative pr-20"
     >
       <div className="flex items-center gap-4 flex-1">
         <div
@@ -94,6 +98,63 @@ export const TransactionItem = ({ icon, title, date, amount, type, color }: {
       <p className={type === 'INCOME' ? 'amount-income' : 'amount-expense'}>
         {type === 'INCOME' ? '+' : '-'}{amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
       </p>
+
+      {/* Action Menu (Popup) */}
+      <div className="absolute right-2 top-1/2 -translate-y-1/2">
+        <Menu as="div" className="relative inline-block text-left">
+          <div>
+            <Menu.Button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none">
+              <EllipsisVerticalIcon className="w-6 h-6" aria-hidden="true" />
+            </Menu.Button>
+          </div>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items className="absolute right-0 mt-2 w-32 origin-top-right divide-y divide-gray-100 rounded-lg bg-white shadow-xl ring-1 ring-black/5 focus:outline-none z-50 overflow-hidden">
+              <div className="py-1">
+                {onEdit && (
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit();
+                        }}
+                        className={`${active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
+                          } group flex w-full items-center px-4 py-2.5 text-sm font-medium transition-colors`}
+                      >
+                        Modifier
+                      </button>
+                    )}
+                  </Menu.Item>
+                )}
+                {onDelete && (
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete();
+                        }}
+                        className={`${active ? 'bg-red-50 text-red-600' : 'text-red-500'
+                          } group flex w-full items-center px-4 py-2.5 text-sm font-medium transition-colors`}
+                      >
+                        Supprimer
+                      </button>
+                    )}
+                  </Menu.Item>
+                )}
+              </div>
+            </Menu.Items>
+          </Transition>
+        </Menu>
+      </div>
     </motion.div>
   );
 };
