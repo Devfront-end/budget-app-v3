@@ -14,3 +14,30 @@ coverage/
 *.swp
 *.swo
 *~
+
+# Temporary Repair & Test Scripts
+check_categories.ts
+force_repair.ts
+inspect_categories_detailed.ts
+migrate_categories_fix.ts
+test_add_category.ts
+test_add_transaction.ts
+test_init_defaults_idempotency.ts
+
+# Security & Secrets
+*.pem
+*.key
+*.cert
+*.pfx
+*.p12
+*.asc
+id_rsa
+id_rsa.pub
+
+# Database
+*.sql
+*.sqlite
+*.db
+backups/
+dump.rdb
+
