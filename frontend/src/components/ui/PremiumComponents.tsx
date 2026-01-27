@@ -82,7 +82,7 @@ export const TransactionItem = ({ icon, title, date, amount, type, color, onEdit
       as={motion.div}
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="transaction-item group relative pr-20 data-[headlessui-state=open]:z-50"
+      className="transaction-item group relative pr-20 data-[headlessui-state=open]:z-[100]"
     >
       <div className="flex items-center gap-4 flex-1">
         <div
@@ -114,7 +114,7 @@ export const TransactionItem = ({ icon, title, date, amount, type, color, onEdit
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 mt-2 w-32 origin-top-right divide-y divide-gray-100 rounded-lg bg-white shadow-xl ring-1 ring-black/5 focus:outline-none z-[60] overflow-hidden">
+          <Menu.Items className="absolute right-0 mt-2 w-32 origin-top-right divide-y divide-gray-100 rounded-lg bg-white shadow-xl ring-1 ring-black/5 focus:outline-none z-[100] overflow-hidden">
             <div className="py-1">
               {onEdit && (
                 <Menu.Item>
