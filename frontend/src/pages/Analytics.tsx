@@ -103,7 +103,7 @@ function Analytics() {
         return (
           <PieChart>
             <defs>
-              {stats.map((entry, index) => (
+              {stats.map((_, index) => (
                 <linearGradient key={`grad-${index}`} id={`colorPie-${index}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={PREMIUM_COLORS[index % PREMIUM_COLORS.length]} stopOpacity={0.9} />
                   <stop offset="100%" stopColor={PREMIUM_COLORS[index % PREMIUM_COLORS.length]} stopOpacity={0.6} />
@@ -120,7 +120,7 @@ function Analytics() {
               dataKey="amount"
               stroke="none"
             >
-              {stats.map((entry, index) => (
+              {stats.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={`url(#colorPie-${index})`} />
               ))}
             </Pie>
@@ -143,7 +143,7 @@ function Analytics() {
             />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="amount" name="Montant" radius={[0, 8, 8, 0]} barSize={32}>
-              {stats.map((entry, index) => (
+              {stats.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={PREMIUM_COLORS[index % PREMIUM_COLORS.length]} />
               ))}
             </Bar>
