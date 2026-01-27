@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { dashboardService } from '../services/dashboardService';
 import { transactionService } from '../services/transactionService';
@@ -26,6 +26,7 @@ import {
 import { AddTransactionModal } from '../components/features/AddTransactionModal';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
   const [income, setIncome] = useState(0);
@@ -180,7 +181,7 @@ function Dashboard() {
           <h2 className="text-xl font-bold mb-6">Actions rapides</h2>
           <div className="flex gap-6 justify-around">
             <FABButton icon={<PlusIcon className="w-8 h-8" />} label="Ajouter" onClick={() => { setEditingTransaction(null); setShowAddModal(true); }} />
-            <FABButton icon={<ChartBarIcon className="w-8 h-8" />} label="Statistiques" onClick={() => alert('Voir stats')} variant="success" />
+            <FABButton icon={<ChartBarIcon className="w-8 h-8" />} label="Statistiques" onClick={() => navigate('/analytics')} variant="success" />
             <FABButton icon={<CreditCardIcon className="w-8 h-8" />} label="Comptes" onClick={() => alert('Voir comptes')} />
             <FABButton icon={<TrophyIcon className="w-8 h-8" />} label="Objectifs" onClick={() => alert('Voir objectifs')} />
           </div>
