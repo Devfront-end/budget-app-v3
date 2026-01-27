@@ -207,7 +207,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
             value={formData.description}
             onChange={handleChange}
             className="input-premium"
-            placeholder="Ex: Salaire de janvier"
+            placeholder={formData.type === 'INCOME' ? "Ex: Salaire de janvier" : "Ex: Courses Carrefour"}
           />
         </div>
 
