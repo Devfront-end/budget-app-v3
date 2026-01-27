@@ -215,11 +215,14 @@ function Dashboard() {
           <AnimatePresence>
             {showTransactions && (
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
+                initial="collapsed"
+                animate="open"
+                exit="collapsed"
+                variants={{
+                  open: { height: 'auto', opacity: 1, transitionEnd: { overflow: 'visible' } },
+                  collapsed: { height: 0, opacity: 0, overflow: 'hidden' }
+                }}
                 transition={{ duration: 0.3 }}
-                className="overflow-hidden"
               >
                 <div className="space-y-3 pt-2">
                   {transactions.map((transaction) => (
