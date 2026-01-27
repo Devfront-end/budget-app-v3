@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath } from 'url';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     VitePWA({
@@ -31,7 +31,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/budget-app-v3/',
+  base: mode === 'production' ? '/budget-app-v3/' : '/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -53,4 +53,5 @@ export default defineConfig({
       },
     },
   },
-});
+},
+}));
