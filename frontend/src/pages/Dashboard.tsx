@@ -163,7 +163,7 @@ function Dashboard() {
           </motion.div>
           <motion.div variants={item}>
             <StatsCard
-              title="Économies"
+              title="Solde"
               value={(income - expenses).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
               change={changes.balance}
               icon={<BanknotesIcon className="w-8 h-8" />}
