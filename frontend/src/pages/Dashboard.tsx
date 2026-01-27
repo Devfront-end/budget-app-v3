@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { dashboardService } from '../services/dashboardService';
 import { transactionService } from '../services/transactionService';
 import {
@@ -18,7 +19,9 @@ import {
   ChartBarIcon,
   CreditCardIcon,
   TrophyIcon,
-  ClockIcon
+  ClockIcon,
+  ChevronDownIcon,
+  ChevronUpIcon
 } from '@heroicons/react/24/outline';
 import { AddTransactionModal } from '../components/features/AddTransactionModal';
 
@@ -31,6 +34,7 @@ function Dashboard() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
+  const [showTransactions, setShowTransactions] = useState(false);
 
   const fetchDashboardData = async () => {
     try {
@@ -182,6 +186,7 @@ function Dashboard() {
           </div>
         </GlassCard>
 
+
         {/* Recent Transactions */}
         <GlassCard>
           <div className="flex items-center justify-between mb-6">
@@ -189,20 +194,46 @@ function Dashboard() {
               <ClockIcon className="w-6 h-6 text-primary-600" />
               Transactions récentes
             </h2>
-            <button className="text-primary-600 hover:text-primary-700 font-medium text-sm">
-              Voir tout →
-            </button>
+            <div className="flex items-center gap-4">
+              <Link to="/transactions" className="text-primary-600 hover:text-primary-700 font-medium text-sm">
+                Voir tout →
+              </Link>
+              <button
+                onClick={() => setShowTransactions(!showTransactions)}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label={showTransactions ? "Masquer les transactions" : "Afficher les transactions"}
+              >
+                {showTransactions ? (
+                  <ChevronUpIcon className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                )}
+              </button>
+            </div>
           </div>
-          <div className="space-y-3">
-            {transactions.map((transaction) => (
-              <TransactionItem
-                key={transaction.id}
-                {...transaction}
-                onEdit={() => handleEdit(transaction)}
-                onDelete={() => handleDelete(transaction.id)}
-              />
-            ))}
-          </div>
+
+          <AnimatePresence>
+            {showTransactions && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="space-y-3 pt-2">
+                  {transactions.map((transaction) => (
+                    <TransactionItem
+                      key={transaction.id}
+                      {...transaction}
+                      onEdit={() => handleEdit(transaction)}
+                      onDelete={() => handleDelete(transaction.id)}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </GlassCard>
       </div>
 
