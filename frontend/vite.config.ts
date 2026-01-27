@@ -31,7 +31,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/',
+  base: '/budget-app-v3/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
