@@ -1,5 +1,6 @@
+```typescript
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   PieChart,
   Pie,
@@ -27,9 +28,24 @@ import { GlassCard } from '../components/ui/PremiumComponents';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
+// Palette dynamique et moderne (Indigo, Emerald, Amber, Rose, Violet, Sky)
+const PREMIUM_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#0ea5e9', '#ec4899', '#14b8a6'];
 
 type ChartType = 'pie' | 'bar' | 'area' | 'radar';
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/20 ring-1 ring-black/5">
+        <p className="font-semibold text-gray-700 dark:text-gray-200 mb-1">{label}</p>
+        <p className="text-primary-600 dark:text-primary-400 font-bold text-lg">
+          {Number(payload[0].value).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 function Analytics() {
   const [loading, setLoading] = useState(true);
@@ -42,7 +58,7 @@ function Analytics() {
       try {
         const [statsResponse, transactionsResponse] = await Promise.all([
           dashboardService.getStats(),
-          transactionService.getAll({ limit: 100 }) // Get last 100 for evolution
+          transactionService.getAll({ limit: 100 })
         ]);
 
         if (statsResponse.success && statsResponse.data) {
@@ -50,50 +66,27 @@ function Analytics() {
         }
 
         if (transactionsResponse.success && transactionsResponse.data) {
-          // Process for Time Series (Area Chart)
-          // Group by date (DD/MM) and sum amounts (expenses only usually? or net?) 
-          // Let's show Expenses Evolution for now as it matches "Categories" context
-          const trans = transactionsResponse.data.transactions;
-          const grouped = trans.reduce((acc: any, t: any) => {
-            const dateKey = format(parseISO(t.date), 'dd/MM', { locale: fr });
-            if (t.type === 'EXPENSE') {
-              acc[dateKey] = (acc[dateKey] || 0) + Number(t.amount);
-            }
-            return acc;
-          }, {});
+           const trans = transactionsResponse.data.transactions;
+           // Group by date for line chart
+           const grouped = trans.reduce((acc: any, t: any) => {
+             // Use timestamp sortable
+             const d = parseISO(t.date);
+             const k = format(d, 'yyyy-MM-dd');
+             if (t.type === 'EXPENSE') {
+                acc[k] = (acc[k] || 0) + Number(t.amount);
+             }
+             return acc;
+           }, {});
 
-          const tsData = Object.keys(grouped).map(date => ({
-            date,
-            amount: grouped[date]
-          })).reverse(); // Assuming API returns desc, we want asc usually? No, API returns desc. reverse() makes it asc (oldest first)? 
-          // Actually API returns desc date. Grouping preserves order if careful. 
-          // Let's just map and reverse.
-
-          // Better: standard sort
-          const sortedTsData = Object.keys(grouped).sort((a, b) => {
-            // Quick hack for DD/MM sort within same year... might fail across years.
-            // Ideally rely on ISO sort.
-            // Let's define grouped key as ISO first.
-            return 0;
-          }).map(date => ({ date, amount: grouped[date] }));
-
-          // Re-doing robustly:
-          const tempMap = new Map();
-          trans.forEach((t: any) => {
-            if (t.type !== 'EXPENSE') return;
-            const d = parseISO(t.date);
-            const k = format(d, 'yyyy-MM-dd');
-            const val = Number(t.amount);
-            tempMap.set(k, (tempMap.get(k) || 0) + val);
-          });
-          const finalTs = Array.from(tempMap.entries())
-            .sort((a, b) => a[0].localeCompare(b[0])) // Ascending date
-            .map(([isoDate, amount]) => ({
-              date: format(parseISO(isoDate), 'dd MMM', { locale: fr }),
-              amount
-            }));
-
-          setTimeSeriesData(finalTs);
+           const finalTs = Object.keys(grouped)
+              .sort() // ISO sorting works fine
+              .map(isoDate => ({
+                  fullDate: isoDate,
+                  date: format(parseISO(isoDate), 'dd MMM', { locale: fr }),
+                  amount: grouped[isoDate]
+              }));
+            
+            setTimeSeriesData(finalTs);
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -110,64 +103,105 @@ function Analytics() {
       case 'pie':
         return (
           <PieChart>
+            <defs>
+              {stats.map((entry, index) => (
+                <linearGradient key={`grad - ${ index } `} id={`colorPie - ${ index } `} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={PREMIUM_COLORS[index % PREMIUM_COLORS.length]} stopOpacity={0.9}/>
+                  <stop offset="100%" stopColor={PREMIUM_COLORS[index % PREMIUM_COLORS.length]} stopOpacity={0.6}/>
+                </linearGradient>
+              ))}
+            </defs>
             <Pie
               data={stats}
               cx="50%"
               cy="50%"
-              labelLine={false}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              outerRadius={130}
-              fill="#8884d8"
+              innerRadius={80} // Donut style looks more modern
+              outerRadius={140}
+              paddingAngle={5}
               dataKey="amount"
+              stroke="none"
             >
               {stats.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                <Cell key={`cell - ${ index } `} fill={`url(#colorPie - ${ index })`} />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number) => value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} />
-            <Legend />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend verticalAlign="bottom" height={36} iconType="circle" />
           </PieChart>
         );
       case 'bar':
         return (
-          <BarChart data={stats} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-            <XAxis type="number" />
-            <YAxis dataKey="category" type="category" width={100} />
-            <Tooltip formatter={(value: number) => value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} />
-            <Legend />
-            <Bar dataKey="amount" name="Dépenses" fill="#8884d8" radius={[0, 4, 4, 0]}>
+          <BarChart data={stats} layout="vertical" margin={{ top: 20, right: 30, left: 40, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} strokeOpacity={0.2} />
+            <XAxis type="number" hide />
+            <YAxis 
+                dataKey="category" 
+                type="category" 
+                width={100} 
+                tick={{ fill: '#6B7280', fontSize: 13 }} 
+                axisLine={false}
+                tickLine={false}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="amount" name="Montant" radius={[0, 8, 8, 0]} barSize={32}>
               {stats.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                <Cell key={`cell - ${ index } `} fill={PREMIUM_COLORS[index % PREMIUM_COLORS.length]} />
               ))}
             </Bar>
           </BarChart>
         );
       case 'area':
         return (
-          <AreaChart data={timeSeriesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <AreaChart data={timeSeriesData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.5}/>
+                <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <CartesianGrid strokeDasharray="3 3" />
-            <Tooltip formatter={(value: number) => value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} />
-            <Area type="monotone" dataKey="amount" name="Dépenses" stroke="#8884d8" fillOpacity={1} fill="url(#colorAmount)" />
+            <XAxis 
+                dataKey="date" 
+                tick={{ fill: '#9CA3AF', fontSize: 12 }} 
+                tickLine={false} 
+                axisLine={false}
+                minTickGap={30}
+            />
+            <YAxis 
+                tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+            />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
+            <Tooltip content={<CustomTooltip />} />
+            <Area 
+                type="monotone" 
+                dataKey="amount" 
+                stroke="#6366f1" 
+                strokeWidth={3}
+                fillOpacity={1} 
+                fill="url(#colorAmount)" 
+                activeDot={{ r: 6, strokeWidth: 0, fill: '#4f46e5' }}
+            />
           </AreaChart>
         );
       case 'radar':
         return (
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={stats}>
-            <PolarGrid />
-            <PolarAngleAxis dataKey="category" />
-            <PolarRadiusAxis angle={30} domain={[0, 'auto']} />
-            <Radar name="Dépenses" dataKey="amount" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-            <Legend />
-            <Tooltip formatter={(value: number) => value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} />
+          <RadarChart cx="50%" cy="50%" outerRadius="75%" data={stats}>
+            <PolarGrid strokeOpacity={0.1} />
+            <PolarAngleAxis 
+                dataKey="category" 
+                tick={{ fill: '#6B7280', fontSize: 12 }}
+            />
+            <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={false} axisLine={false} />
+            <Radar 
+                name="Dépenses" 
+                dataKey="amount" 
+                stroke="#8b5cf6" 
+                strokeWidth={3} 
+                fill="#8b5cf6" 
+                fillOpacity={0.3} 
+            />
+            <Tooltip content={<CustomTooltip />} />
           </RadarChart>
         );
       default:
@@ -184,49 +218,71 @@ function Analytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 p-6 pb-24">
       <div className="max-w-7xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+           initial={{ opacity: 0, y: -20 }}
+           animate={{ opacity: 1, y: 0 }}
+           className="mb-8"
         >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
             Statistiques
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Analysez vos finances sous tous les angles</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-2 text-lg">
+            Analysez la dynamique de vos finances
+          </p>
         </motion.div>
 
-        <GlassCard className="mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <h2 className="text-xl font-bold">Visualisation</h2>
-            <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl overflow-x-auto max-w-full">
+        <GlassCard className="mb-8 min-h-[600px] flex flex-col">
+          <div className="flex flex-col xl:flex-row justify-between items-center mb-8 gap-6">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+               {chartType === 'pie' && 'Répartition des dépenses'}
+               {chartType === 'bar' && 'Comparatif par catégorie'}
+               {chartType === 'area' && 'Évolution temporelle'}
+               {chartType === 'radar' && 'Équilibre des postes'}
+            </h2>
+            
+            <div className="bg-gray-100/50 dark:bg-gray-800/50 p-2 rounded-2xl backdrop-blur-sm shadow-inner flex flex-wrap justify-center gap-2">
               {[
-                { type: 'pie', icon: PieChartIcon, label: 'Répartition' },
-                { type: 'bar', icon: ChartBarIcon, label: 'Comparatif' },
+                { type: 'pie', icon: PieChartIcon, label: 'Donut' },
+                { type: 'bar', icon: ChartBarIcon, label: 'Barres' },
                 { type: 'area', icon: TrendingUpIcon, label: 'Évolution' },
                 { type: 'radar', icon: RadarIcon, label: 'Radar' },
               ].map((btn) => (
-                <button
-                  key={btn.type}
-                  onClick={() => setChartType(btn.type as ChartType)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${chartType === btn.type
-                    ? 'bg-white dark:bg-gray-700 shadow-sm text-primary-600 font-medium'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                    }`}
-                >
-                  <btn.icon className="w-4 h-4" />
-                  <span className="text-sm">{btn.label}</span>
-                </button>
+                  <button
+                    key={btn.type}
+                    onClick={() => setChartType(btn.type as ChartType)}
+                    className={`relative flex items - center gap - 2 px - 5 py - 2.5 rounded - xl transition - all duration - 300 z - 10 ${
+  chartType === btn.type ? 'text-indigo-600 font-semibold' : 'text-gray-500 hover:text-gray-700'
+} `}
+                  >
+                    {chartType === btn.type && (
+                        <motion.div
+                            layoutId="activeTab"
+                            className="absolute inset-0 bg-white dark:bg-gray-700 shadow-md rounded-xl"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                        <btn.icon className="w-5 h-5" />
+                        <span className="text-sm">{btn.label}</span>
+                    </span>
+                  </button>
               ))}
             </div>
           </div>
 
-          <div className="h-[400px] w-full">
+          <motion.div 
+            key={chartType}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="flex-1 w-full h-full min-h-[400px]"
+          >
             <ResponsiveContainer width="100%" height="100%">
               {renderChart() as any}
             </ResponsiveContainer>
-          </div>
+          </motion.div>
         </GlassCard>
       </div>
     </div>
