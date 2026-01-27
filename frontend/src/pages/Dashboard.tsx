@@ -212,31 +212,18 @@ function Dashboard() {
             </div>
           </div>
 
-          <AnimatePresence>
-            {showTransactions && (
-              <motion.div
-                initial="collapsed"
-                animate="open"
-                exit="collapsed"
-                variants={{
-                  open: { height: 'auto', opacity: 1, transitionEnd: { overflow: 'visible' } },
-                  collapsed: { height: 0, opacity: 0, overflow: 'hidden' }
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="space-y-3 pt-2">
-                  {transactions.map((transaction) => (
-                    <TransactionItem
-                      key={transaction.id}
-                      {...transaction}
-                      onEdit={() => handleEdit(transaction)}
-                      onDelete={() => handleDelete(transaction.id)}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {showTransactions && (
+            <div className="space-y-3 pt-2">
+              {transactions.map((transaction) => (
+                <TransactionItem
+                  key={transaction.id}
+                  {...transaction}
+                  onEdit={() => handleEdit(transaction)}
+                  onDelete={() => handleDelete(transaction.id)}
+                />
+              ))}
+            </div>
+          )}
         </GlassCard>
       </div>
 
