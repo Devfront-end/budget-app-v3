@@ -71,21 +71,26 @@ export class CategoryController {
         { name: 'Freelance', icon: '💼', color: '#3B82F6', type: 'INCOME' },
       ];
 
-      const categories = await Promise.all(
-        defaultCategories.map((cat: any) =>
-          prisma.category.create({
-            data: {
-              userId: userId!,
-              ...cat,
-            },
-          })
-        )
-      );
+      // Use createMany with skipDuplicates to ignore existing categories
+      await prisma.category.createMany({
+        data: defaultCategories.map((cat) => ({
+          userId: userId!,
+          ...cat,
+          type: cat.type as any, // Ensure type casts correctly if needed
+        })),
+        skipDuplicates: true,
+      });
 
-      res.status(201).json({
+      // Fetch the final list of categories to return to the frontend
+      const categories = await prisma.category.findMany({
+        where: { userId },
+        orderBy: { name: 'asc' },
+      });
+
+      res.status(200).json({
         success: true,
         data: { categories },
-        message: 'Default categories created successfully',
+        message: 'Default categories restored successfully',
       });
     } catch (error: any) {
       logger.error('Create default categories error:', error);

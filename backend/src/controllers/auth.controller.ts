@@ -62,6 +62,29 @@ export class AuthController {
         },
       });
 
+      // Create default categories for the new user
+      const defaultCategories = [
+        { name: 'Alimentation', icon: '🛒', color: '#10B981', type: 'EXPENSE' },
+        { name: 'Transport', icon: '🚗', color: '#3B82F6', type: 'EXPENSE' },
+        { name: 'Loisirs', icon: '🎬', color: '#8B5CF6', type: 'EXPENSE' },
+        { name: 'Restaurant', icon: '🍽️', color: '#F59E0B', type: 'EXPENSE' },
+        { name: 'Shopping', icon: '🛍️', color: '#EC4899', type: 'EXPENSE' },
+        { name: 'Santé', icon: '🏥', color: '#EF4444', type: 'EXPENSE' },
+        { name: 'Salaire', icon: '💰', color: '#10B981', type: 'INCOME' },
+        { name: 'Freelance', icon: '💼', color: '#3B82F6', type: 'INCOME' },
+      ];
+
+      await Promise.all(
+        defaultCategories.map((cat: any) =>
+          prisma.category.create({
+            data: {
+              userId: user.id,
+              ...cat,
+            },
+          })
+        )
+      );
+
       logger.info(`New user registered: ${email}`);
 
       res.status(201).json({

@@ -9,6 +9,11 @@ export interface DashboardSummary {
         totalExpense: number;
         balance: number;
         transactionCount: number;
+        changes: {
+            income: number;
+            expense: number;
+            balance: number;
+        };
     };
 }
 

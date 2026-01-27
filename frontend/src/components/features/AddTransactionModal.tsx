@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { transactionService } from '../../services/transactionService';
-import api from '../../services/api';
+import { categoryService } from '../../services/categoryService';
+import { bankAccountService } from '../../services/bankAccountService';
+// import api from '../../services/api'; // Not directly needed if using services
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -23,6 +25,18 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
   const [_categories, setCategories] = useState<any[]>([]);
   const [_accounts, setAccounts] = useState<any[]>([]);
   const [error, setError] = useState('');
+
+  const handleRestoreDefaults = async () => {
+    try {
+      setLoading(true);
+      await categoryService.initDefaults();
+      await loadCategoriesAndAccounts();
+    } catch (err) {
+      console.error('Failed to restore defaults', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -54,15 +68,22 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
   const loadCategoriesAndAccounts = async () => {
     try {
       // Charger les catégories et comptes
-      const [categoriesRes, accountsRes] = await Promise.all([
-        api.get('/categories').catch(() => ({ data: { data: { categories: [] } } })),
-        api.get('/bank-accounts').catch(() => ({ data: { data: { accounts: [] } } })),
+      const [categoriesData, accountsData] = await Promise.all([
+        categoryService.getCategories().catch(err => {
+          console.error("Failed to load categories", err);
+          return { data: { categories: [] } };
+        }),
+        bankAccountService.getAccounts().catch(err => {
+          console.error("Failed to load accounts", err);
+          return { data: { accounts: [] } };
+        }),
       ]);
 
-      setCategories(categoriesRes.data?.data?.categories || []);
-      setAccounts(accountsRes.data?.data?.accounts || []);
-    } catch (err) {
+      setCategories(categoriesData.data?.categories || []);
+      setAccounts(accountsData.data?.accounts || []);
+    } catch (err: any) {
       console.error('Erreur chargement données:', err);
+      setError(`Erreur de chargement: ${err.message || 'Unknown error'}`);
     }
   };
 
@@ -124,6 +145,8 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
           </div>
         )}
 
+
+
         {/* Type de transaction */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -138,7 +161,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
                 : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800'
                 }`}
             >
-              💸 Dépense
+              Dépense
             </button>
             <button
               type="button"
@@ -148,7 +171,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
                 : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800'
                 }`}
             >
-              💰 Revenu
+              Revenu
             </button>
           </div>
         </div>
@@ -206,9 +229,20 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
 
         {/* Catégorie (optionnel) */}
         <div>
-          <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Catégorie <span className="text-gray-400">(optionnel)</span>
-          </label>
+          <div className="flex justify-between items-center mb-2">
+            <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Catégorie <span className="text-gray-400">(optionnel)</span>
+            </label>
+            {_categories.length === 0 && (
+              <button
+                type="button"
+                onClick={handleRestoreDefaults}
+                className="text-xs text-primary-600 hover:text-primary-700 font-medium underline"
+              >
+                Restaurer les catégories
+              </button>
+            )}
+          </div>
           <select
             id="categoryId"
             name="categoryId"
@@ -217,12 +251,19 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
             className="input-premium"
           >
             <option value="">Aucune catégorie</option>
-            {_categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.icon} {cat.name}
-              </option>
-            ))}
+            {_categories
+              .filter(cat => cat.type === formData.type)
+              .map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
           </select>
+          {_categories.filter(cat => cat.type === formData.type).length === 0 && _categories.length > 0 && (
+            <p className="text-xs text-warning-600 mt-1">
+              Aucune catégorie '{(formData.type === 'INCOME' ? 'Revenu' : 'Dépense')}' trouvée.
+            </p>
+          )}
         </div>
 
         {/* Compte bancaire (optionnel) */}

@@ -21,14 +21,14 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
             onClick={onClose}
             className="modal-backdrop"
           />
-          
+
           {/* Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="modal-content relative max-h-[90vh] overflow-y-auto"
+              className="modal-content relative max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -43,7 +43,7 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
                   ✕
                 </button>
               </div>
-              
+
               {/* Content */}
               {children}
             </motion.div>

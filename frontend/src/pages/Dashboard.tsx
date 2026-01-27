@@ -27,6 +27,7 @@ function Dashboard() {
   const [balance, setBalance] = useState(0);
   const [income, setIncome] = useState(0);
   const [expenses, setExpenses] = useState(0);
+  const [changes, setChanges] = useState({ income: 0, expense: 0, balance: 0 });
   const [transactions, setTransactions] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
@@ -43,6 +44,7 @@ function Dashboard() {
         setBalance(summaryData.data.summary.balance);
         setIncome(summaryData.data.summary.totalIncome);
         setExpenses(summaryData.data.summary.totalExpense);
+        setChanges(summaryData.data.summary.changes || { income: 0, expense: 0, balance: 0 });
       }
 
       if (transactionsData.success && transactionsData.data.transactions) {
@@ -147,7 +149,7 @@ function Dashboard() {
             <StatsCard
               title="Revenus ce mois"
               value={income.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-              change={12.5}
+              change={changes.income}
               icon={<ArrowTrendingUpIcon className="w-8 h-8" />}
             />
           </motion.div>
@@ -155,7 +157,7 @@ function Dashboard() {
             <StatsCard
               title="Dépenses ce mois"
               value={expenses.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-              change={-5.2}
+              change={changes.expense}
               icon={<ArrowTrendingDownIcon className="w-8 h-8" />}
             />
           </motion.div>
@@ -163,7 +165,7 @@ function Dashboard() {
             <StatsCard
               title="Économies"
               value={(income - expenses).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-              change={8.3}
+              change={changes.balance}
               icon={<BanknotesIcon className="w-8 h-8" />}
             />
           </motion.div>

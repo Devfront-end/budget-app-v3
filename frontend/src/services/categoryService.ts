@@ -25,4 +25,9 @@ export const categoryService = {
     const response = await api.delete(`/categories/${id}`);
     return response.data;
   },
+
+  async initDefaults() {
+    const response = await api.post('/categories/init-defaults', {});
+    return response.data;
+  },
 };

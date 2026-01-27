@@ -26,9 +26,11 @@ export const authenticateJWT = async (
 ) => {
   try {
     const authHeader = req.headers.authorization;
+    // console.log('[Auth] Check:', req.method, req.path, authHeader ? 'Token present' : 'No Token');
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
+      console.log('[Auth] Missing token for:', req.method, req.path);
       return res.status(401).json({
         success: false,
         error: {
@@ -50,6 +52,7 @@ export const authenticateJWT = async (
     });
 
     if (!user || !user.isActive) {
+      console.log('[Auth] Invalid user:', decoded.userId);
       return res.status(401).json({
         success: false,
         error: {

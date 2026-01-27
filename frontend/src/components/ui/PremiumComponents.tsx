@@ -208,7 +208,7 @@ export const StatsCard = ({ title, value, change, icon }: {
         <h3 className="text-2xl font-bold mt-1">{value}</h3>
         {change !== undefined && (
           <p className={`text-sm mt-1 ${isPositive ? 'text-success-500' : 'text-danger-500'}`}>
-            {isPositive ? '↑' : '↓'} {Math.abs(change)}%
+            {isPositive ? '↑' : '↓'} {Math.abs(change).toFixed(1)}%
           </p>
         )}
       </div>
