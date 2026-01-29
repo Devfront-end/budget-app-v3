@@ -11,11 +11,23 @@ const consoleFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({ format: 'HH:mm:ss' }),
   winston.format.printf(({ timestamp, level, message, ...meta }) => {
+    let msg = message;
+    if (typeof message === 'object') {
+      msg = JSON.stringify(message, null, 2);
+    }
+
     let metaStr = '';
     if (Object.keys(meta).length > 0) {
-      metaStr = JSON.stringify(meta, null, 2);
+      // Remove service from meta if it's the default service
+      if (meta.service === 'smart-budget-api') {
+        delete meta.service;
+      }
+      if (Object.keys(meta).length > 0) {
+        metaStr = JSON.stringify(meta, null, 2);
+      }
     }
-    return `${timestamp} [${level}]: ${message} ${metaStr}`;
+
+    return `${timestamp} [${level}]: ${msg} ${metaStr}`;
   })
 );
 

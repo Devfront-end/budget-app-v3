@@ -500,5 +500,50 @@ export class AuthController {
       res.status(500).json({ success: false, error: { code: 'RESET_ERROR', message: 'Failed to reset password' } });
     }
   }
+  static async getMe(req: Request, res: Response) {
+    try {
+      const user = (req as any).user; // Attached by authenticateJWT middleware
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: 'User not authenticated' }
+        });
+      }
+
+      // Fetch fresh user data from DB to ensure we have latest info (like verification status)
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.userId || user.id }, // JWT payload might have userId, or req.user might be the full object depending on middleware
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          firstName: true,
+          lastName: true,
+          twoFactorEnabled: true,
+          isEmailVerified: true,
+          createdAt: true
+        }
+      });
+
+      if (!dbUser) {
+        return res.status(404).json({
+          success: false,
+          error: { code: 'USER_NOT_FOUND', message: 'User not found' }
+        });
+      }
+
+      res.json({
+        success: true,
+        data: { user: dbUser }
+      });
+    } catch (error) {
+      logger.error('Get Me error:', error);
+      res.status(500).json({
+        success: false,
+        error: { code: 'GET_ME_ERROR', message: 'Failed to fetch user profile' }
+      });
+    }
+  }
 }
 

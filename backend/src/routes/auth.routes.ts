@@ -25,6 +25,7 @@ router.post('/login', authLimiter, validate(loginSchema), AuthController.login);
 router.post('/logout', AuthController.logout);
 router.post('/refresh-token', AuthController.refreshToken);
 router.get('/verify-email', AuthController.verifyEmail);
+router.get('/me', authenticateJWT, AuthController.getMe);
 
 // 2FA Routes (Protected)
 router.post('/2fa/enable', authenticateJWT, AuthController.enable2FA);
