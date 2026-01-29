@@ -65,10 +65,10 @@ export const authenticateJWT = async (
     req.user = { id: user.id, email: user.email };
     next();
   } catch (error) {
-    return res.status(403).json({
+    return res.status(401).json({
       success: false,
       error: {
-        code: 'FORBIDDEN',
+        code: 'UNAUTHORIZED',
         message: 'Invalid or expired token',
       },
     });

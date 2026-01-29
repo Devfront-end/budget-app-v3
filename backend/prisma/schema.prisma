@@ -26,6 +26,8 @@ model User {
   updatedAt         DateTime  @updatedAt
   lastLogin         DateTime?
   isActive          Boolean   @default(true)
+  failedLoginAttempts Int       @default(0)
+  lockoutUntil      DateTime?
   
   // Relations
   transactions      Transaction[]
@@ -36,12 +38,15 @@ model User {
   paymentPlans      PaymentPlan[]
   budgets           Budget[]
   auditLogs         AuditLog[]
+  refreshTokens     RefreshToken[]
+  debtRatios        DebtRatio[]
   adminProfile      Admin?
   
   @@map("users")
   @@index([email])
   @@index([username])
 }
+
 
 model Transaction {
   id              String    @id @default(uuid())
@@ -248,6 +253,19 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+  @@index([userId])
+}
+
 model Admin {
   id        String    @id @default(uuid())
   userId    String    @unique
@@ -262,4 +280,25 @@ enum AdminRole {
   SUPER_ADMIN
   ADMIN
   MODERATOR
+}
+
+model DebtRatio {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month           String   // YYYY-MM
+  monthlyIncome   Decimal  @db.Decimal(10, 2)
+  monthlyDebts    Decimal  @db.Decimal(10, 2)
+  ratio           Decimal  @db.Decimal(5, 2) // Pourcentage
+  status          DebtStatus
+  createdAt       DateTime @default(now())
+  
+  @@unique([userId, month])
+  @@map("debt_ratios")
+}
+
+enum DebtStatus {
+  GOOD
+  ACCEPTABLE
+  RISKY
 }

@@ -26,6 +26,10 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
   const [_accounts, setAccounts] = useState<any[]>([]);
   const [error, setError] = useState('');
 
+  // New state for manual category creation
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
   const handleRestoreDefaults = async () => {
     try {
       setLoading(true);
@@ -61,6 +65,9 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
           bankAccountId: '',
           date: new Date().toISOString().split('T')[0],
         });
+        // Reset manual creation mode
+        setIsCreatingCategory(false);
+        setNewCategoryName('');
       }
     }
   }, [isOpen, transaction]);
@@ -110,6 +117,27 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
         categoryId: formData.categoryId || null,
         bankAccountId: formData.bankAccountId || null,
       };
+
+      // Handle new category creation
+      if (isCreatingCategory && newCategoryName.trim()) {
+        try {
+          const newCategory = await categoryService.createCategory({
+            name: newCategoryName.trim(),
+            type: formData.type,
+            // Default icon and color for quick creation
+            icon: '🆕', // You might want to let them pick this later
+            color: '#6B7280'
+          });
+          data.categoryId = newCategory.data.category.id;
+        } catch (catError) {
+          console.error("Failed to create new category", catError);
+          // Don't block transaction type, but maybe warn? 
+          // For now, let's treat it as a hard error or just attach NO category?
+          // Let's attach no category if it fails, or throw to stop.
+          // Throwing to stop is safer to prevent data mismatch.
+          throw new Error("Impossible de créer la nouvelle catégorie.");
+        }
+      }
 
       if (transaction) {
         await transactionService.update(transaction.id, data);
@@ -233,36 +261,68 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess, transaction }:
             <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Catégorie <span className="text-gray-400">(optionnel)</span>
             </label>
-            {_categories.length === 0 && (
+            <div className="flex gap-3">
+              {_categories.length === 0 && !isCreatingCategory && (
+                <button
+                  type="button"
+                  onClick={handleRestoreDefaults}
+                  className="text-xs text-primary-600 hover:text-primary-700 font-medium underline"
+                >
+                  Restaurer les catégories
+                </button>
+              )}
               <button
                 type="button"
-                onClick={handleRestoreDefaults}
-                className="text-xs text-primary-600 hover:text-primary-700 font-medium underline"
+                onClick={() => {
+                  setIsCreatingCategory(!isCreatingCategory);
+                  if (!isCreatingCategory) {
+                    setFormData(prev => ({ ...prev, categoryId: '' })); // Reset selection when switching to new
+                  } else {
+                    setNewCategoryName(''); // Reset name when switching back
+                  }
+                }}
+                className="text-xs text-primary-600 hover:text-primary-700 font-bold transition-colors"
+                title={isCreatingCategory ? "Choisir existante" : "Créer nouvelle"}
               >
-                Restaurer les catégories
+                {isCreatingCategory ? "Choisir une liste" : "+ Nouvelle catégorie"}
               </button>
-            )}
+            </div>
+
           </div>
-          <select
-            id="categoryId"
-            name="categoryId"
-            value={formData.categoryId}
-            onChange={handleChange}
-            className="input-premium"
-          >
-            <option value="">Aucune catégorie</option>
-            {_categories
-              .filter(cat => cat.type === formData.type)
-              .map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-          </select>
-          {_categories.filter(cat => cat.type === formData.type).length === 0 && _categories.length > 0 && (
-            <p className="text-xs text-warning-600 mt-1">
-              Aucune catégorie '{(formData.type === 'INCOME' ? 'Revenu' : 'Dépense')}' trouvée.
-            </p>
+
+          {isCreatingCategory ? (
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              className="input-premium"
+              placeholder={`Nouvelle catégorie de ${formData.type === 'INCOME' ? 'revenu' : 'dépense'}`}
+              autoFocus
+            />
+          ) : (
+            <>
+              <select
+                id="categoryId"
+                name="categoryId"
+                value={formData.categoryId}
+                onChange={handleChange}
+                className="input-premium"
+              >
+                <option value="">Aucune catégorie</option>
+                {_categories
+                  .filter(cat => cat.type === formData.type)
+                  .map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+              </select>
+              {_categories.filter(cat => cat.type === formData.type).length === 0 && _categories.length > 0 && (
+                <p className="text-xs text-warning-600 mt-1">
+                  Aucune catégorie '{formData.type === 'INCOME' ? 'Revenu' : 'Dépense'}' trouvée.
+                </p>
+              )}
+            </>
           )}
         </div>
 

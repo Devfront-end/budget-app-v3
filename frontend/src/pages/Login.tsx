@@ -43,6 +43,7 @@ function Login() {
           </label>
           <input
             {...register('email', { required: 'Email requis' })}
+            id="email"
             type="email"
             className="input mt-1"
             placeholder="vous@exemple.com"
@@ -51,11 +52,17 @@ function Login() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Mot de passe
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Mot de passe
+            </label>
+            <Link to="/forgot-password" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+              Mot de passe oublié ?
+            </Link>
+          </div>
           <input
             {...register('password', { required: 'Mot de passe requis' })}
+            id="password"
             type="password"
             className="input mt-1"
             placeholder="••••••••"

@@ -9,6 +9,7 @@ import {
   ClipboardDocumentListIcon,
   ChartBarIcon,
   CalculatorIcon,
+  ScaleIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
@@ -20,6 +21,7 @@ const navigation = [
   { name: 'Abonnements', to: '/subscriptions', icon: ArrowPathIcon },
   { name: 'Wishlist', to: '/wishlist', icon: HeartIcon },
   { name: 'Paiements 4X', to: '/payment-plans', icon: ClipboardDocumentListIcon },
+  { name: 'Taux d\'endettement', to: '/debt-ratio', icon: ScaleIcon },
   { name: 'Analytics', to: '/analytics', icon: ChartBarIcon },
 ];
 
@@ -35,10 +37,9 @@ function Sidebar() {
             key={item.name}
             to={item.to}
             className={({ isActive }) =>
-              `flex items-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-primary-50 text-primary-700'
-                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+              `flex items-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive
+                ? 'bg-primary-50 text-primary-700'
+                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
               }`
             }
           >

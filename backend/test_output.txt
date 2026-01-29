@@ -1,0 +1,210 @@
+
+> smart-budget-backend@1.0.0 test
+> jest --coverage transaction.test.ts --verbose
+
+  console.log
+    =================================================================
+
+      at Function.log [as sendVerificationEmail] (src/services/email.service.ts:61:21)
+
+  console.log
+    📧 [MOCK EMAIL] Verification for: trans-test@example.com
+
+      at Function.log [as sendVerificationEmail] (src/services/email.service.ts:62:21)
+
+  console.log
+    🔗 Link: http://localhost:3000/api/v1/auth/verify-email?token=8cb0c1211a0eb91067267dc33de52a11925ba09d0437ce39b78564e53bda4ac8
+
+      at Function.log [as sendVerificationEmail] (src/services/email.service.ts:63:21)
+
+  console.log
+    =================================================================
+
+      at Function.log [as sendVerificationEmail] (src/services/email.service.ts:64:21)
+
+02:47:10 [[32minfo[39m]: [MOCK EMAIL] Verification link for trans-test@example.com: http://localhost:3000/api/v1/auth/verify-email?token=8cb0c1211a0eb91067267dc33de52a11925ba09d0437ce39b78564e53bda4ac8 {
+  "service": "smart-budget-api"
+}
+02:47:10 [[32minfo[39m]: [object Object] {
+  "service": "smart-budget-api"
+}
+02:47:11 [[32minfo[39m]: User logged in: trans-test@example.com {
+  "service": "smart-budget-api"
+}
+02:47:11 [[32minfo[39m]: [object Object] {
+  "service": "smart-budget-api"
+}
+02:47:11 [[32minfo[39m]: Category created: f77da3a1-6723-4b1f-9b6c-39dffa1ed772 by user 4605d9fb-3269-4122-a749-05713b5f04c2 {
+  "service": "smart-budget-api"
+}
+02:47:11 [[32minfo[39m]: [object Object] {
+  "service": "smart-budget-api"
+}
+  console.log
+    prisma:error 
+    Invalid `prisma.bankAccount.create()` invocation in
+    /Users/jules/budget-app/backend/src/controllers/bankAccount.controller.ts:32:48
+    
+      29 const userId = req.user?.id;
+      30 const { name, type, bankName, accountNumber, balance, currency } = req.body;
+      31 
+    → 32 const account = await prisma.bankAccount.create({
+           data: {
+             userId: "4605d9fb-3269-4122-a749-05713b5f04c2",
+             name: "Main Account",
+             type: "CHECKING",
+             accountNumber: "xxxx",
+             balance: 1000,
+             currency: "EUR",
+         +   bankName: String
+           }
+         })
+    
+    Argument `bankName` is missing.
+
+      at Object.mc (node_modules/@prisma/client/runtime/library.js:21:432)
+
+02:47:11 [[31merror[39m]: Create bank account error: 
+Invalid `prisma.bankAccount.create()` invocation in
+/Users/jules/budget-app/backend/src/controllers/bankAccount.controller.ts:32:48
+
+  29 const userId = req.user?.id;
+  30 const { name, type, bankName, accountNumber, balance, currency } = req.body;
+  31 
+→ 32 const account = await prisma.bankAccount.create({
+       data: {
+         userId: "4605d9fb-3269-4122-a749-05713b5f04c2",
+         name: "Main Account",
+         type: "CHECKING",
+         accountNumber: "xxxx",
+         balance: 1000,
+         currency: "EUR",
+     +   bankName: String
+       }
+     })
+
+Argument `bankName` is missing. {
+  "service": "smart-budget-api",
+  "name": "PrismaClientValidationError",
+  "clientVersion": "5.22.0",
+  "stack": "PrismaClientValidationError: \nInvalid `prisma.bankAccount.create()` invocation in\n/Users/jules/budget-app/backend/src/controllers/bankAccount.controller.ts:32:48\n\n  29 const userId = req.user?.id;\n  30 const { name, type, bankName, accountNumber, balance, currency } = req.body;\n  31 \n→ 32 const account = await prisma.bankAccount.create({\n       data: {\n         userId: \"4605d9fb-3269-4122-a749-05713b5f04c2\",\n         name: \"Main Account\",\n         type: \"CHECKING\",\n         accountNumber: \"xxxx\",\n         balance: 1000,\n         currency: \"EUR\",\n     +   bankName: String\n       }\n     })\n\nArgument `bankName` is missing.\n    at wn (/Users/jules/budget-app/backend/node_modules/@prisma/client/runtime/library.js:29:1363)\n    at $n.handleRequestError (/Users/jules/budget-app/backend/node_modules/@prisma/client/runtime/library.js:121:6958)\n    at $n.handleAndLogRequestError (/Users/jules/budget-app/backend/node_modules/@prisma/client/runtime/library.js:121:6623)\n    at $n.request (/Users/jules/budget-app/backend/node_modules/@prisma/client/runtime/library.js:121:6307)\n    at l (/Users/jules/budget-app/backend/node_modules/@prisma/client/runtime/library.js:130:9633)\n    at create (/Users/jules/budget-app/backend/src/controllers/bankAccount.controller.ts:32:23)"
+}
+02:47:11 [[32minfo[39m]: [object Object] {
+  "service": "smart-budget-api"
+}
+FAIL src/__tests__/transaction.test.ts (6.398 s)
+  Transaction API
+    ✕ should create a transaction linked to category and account (1 ms)
+    ✕ should fetch transactions
+    ✕ should update a transaction
+    ✕ should delete a transaction
+
+  ● Transaction API › should create a transaction linked to category and account
+
+    TypeError: Cannot read properties of undefined (reading 'account')
+
+      68 |                 balance: 1000
+      69 |             });
+    > 70 |         bankAccountId = accRes.body.data.account.id;
+         |                                          ^
+      71 |     });
+      72 |
+      73 |     afterAll(async () => {
+
+      at Object.<anonymous> (src/__tests__/transaction.test.ts:70:42)
+
+  ● Transaction API › should fetch transactions
+
+    TypeError: Cannot read properties of undefined (reading 'account')
+
+      68 |                 balance: 1000
+      69 |             });
+    > 70 |         bankAccountId = accRes.body.data.account.id;
+         |                                          ^
+      71 |     });
+      72 |
+      73 |     afterAll(async () => {
+
+      at Object.<anonymous> (src/__tests__/transaction.test.ts:70:42)
+
+  ● Transaction API › should update a transaction
+
+    TypeError: Cannot read properties of undefined (reading 'account')
+
+      68 |                 balance: 1000
+      69 |             });
+    > 70 |         bankAccountId = accRes.body.data.account.id;
+         |                                          ^
+      71 |     });
+      72 |
+      73 |     afterAll(async () => {
+
+      at Object.<anonymous> (src/__tests__/transaction.test.ts:70:42)
+
+  ● Transaction API › should delete a transaction
+
+    TypeError: Cannot read properties of undefined (reading 'account')
+
+      68 |                 balance: 1000
+      69 |             });
+    > 70 |         bankAccountId = accRes.body.data.account.id;
+         |                                          ^
+      71 |     });
+      72 |
+      73 |     afterAll(async () => {
+
+      at Object.<anonymous> (src/__tests__/transaction.test.ts:70:42)
+
+-----------------------------|---------|----------|---------|---------|-----------------------------------------------
+File                         | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                             
+-----------------------------|---------|----------|---------|---------|-----------------------------------------------
+All files                    |    35.7 |    11.37 |   15.66 |    35.9 |                                               
+ src                         |   95.91 |       50 |       0 |   95.91 |                                               
+  app.ts                     |   95.91 |       50 |       0 |   95.91 | 60,85                                         
+ src/config                  |    62.5 |        0 |       0 |    62.5 |                                               
+  database.ts                |    62.5 |        0 |       0 |    62.5 | 14-16                                         
+ src/controllers             |   13.96 |      5.1 |    7.57 |   14.26 |                                               
+  ai.controller.ts           |      15 |        0 |       0 |      15 | 7-48                                          
+  analytics.controller.ts    |   17.64 |        0 |       0 |   17.64 | 7-59                                          
+  auth.controller.ts         |   26.57 |     7.14 |   27.27 |   27.14 | 24,95-133,148,156,164,178-189,197-213,272-500 
+  bankAccount.controller.ts  |      20 |    26.66 |   16.66 |      20 | 7-20,44,58-152                                
+  budget.controller.ts       |    3.52 |        0 |       0 |    3.61 | 7-314                                         
+  category.controller.ts     |   37.03 |       50 |      25 |   37.03 | 7-21,51-97                                    
+  dashboard.controller.ts    |    7.27 |        0 |       0 |     7.4 | 7-174                                         
+  debtRatio.controller.ts    |    8.33 |        0 |       0 |    8.82 | 8-95                                          
+  paymentPlan.controller.ts  |    9.37 |        0 |       0 |    9.37 | 7-98                                          
+  subscription.controller.ts |       6 |        0 |       0 |       6 | 7-177                                         
+  transaction.controller.ts  |    6.15 |        0 |       0 |    6.66 | 7-190                                         
+  wishlist.controller.ts     |    7.31 |        0 |       0 |    7.31 | 7-137                                         
+ src/middleware              |   70.45 |       25 |   71.42 |   66.66 |                                               
+  auth.ts                    |   72.22 |     62.5 |     100 |   70.58 | 33-34,55-56,68                                
+  errorHandler.ts            |   42.85 |        0 |       0 |   33.33 | 11-21                                         
+  requestLogger.ts           |     100 |      100 |     100 |     100 |                                               
+  validate.ts                |   63.63 |        0 |   66.66 |   55.55 | 9-22                                          
+ src/routes                  |     100 |      100 |     100 |     100 |                                               
+  ai.routes.ts               |     100 |      100 |     100 |     100 |                                               
+  analytics.routes.ts        |     100 |      100 |     100 |     100 |                                               
+  auth.routes.ts             |     100 |      100 |     100 |     100 |                                               
+  bankAccount.routes.ts      |     100 |      100 |     100 |     100 |                                               
+  budget.routes.ts           |     100 |      100 |     100 |     100 |                                               
+  category.routes.ts         |     100 |      100 |     100 |     100 |                                               
+  dashboard.routes.ts        |     100 |      100 |     100 |     100 |                                               
+  debtRatio.routes.ts        |     100 |      100 |     100 |     100 |                                               
+  paymentPlan.routes.ts      |     100 |      100 |     100 |     100 |                                               
+  subscription.routes.ts     |     100 |      100 |     100 |     100 |                                               
+  transaction.routes.ts      |     100 |      100 |     100 |     100 |                                               
+  wishlist.routes.ts         |     100 |      100 |     100 |     100 |                                               
+ src/schemas                 |     100 |      100 |     100 |     100 |                                               
+  auth.schema.ts             |     100 |      100 |     100 |     100 |                                               
+ src/services                |      25 |    29.03 |   33.33 |   25.33 |                                               
+  ai.service.ts              |   14.63 |     6.66 |      25 |      15 | 15-141                                        
+  email.service.ts           |   37.14 |       50 |      50 |   37.14 | 16-49,69-85                                   
+ src/utils                   |     100 |      100 |     100 |     100 |                                               
+  logger.ts                  |     100 |      100 |     100 |     100 |                                               
+-----------------------------|---------|----------|---------|---------|-----------------------------------------------
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 4 total
+Snapshots:   0 total
+Time:        6.749 s
+Ran all test suites matching /transaction.test.ts/i.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

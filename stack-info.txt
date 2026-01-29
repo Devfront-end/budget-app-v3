@@ -1,0 +1,584 @@
+=== FRONTEND PACKAGE.JSON ===
+{
+  "name": "smart-budget-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Smart Budget Frontend - Personal finance management UI",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && cp dist/index.html dist/404.html",
+    "preview": "vite preview",
+    "lint": "eslint src --ext ts,tsx",
+    "lint:fix": "eslint src --ext ts,tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.1.1",
+    "@hookform/resolvers": "^3.3.3",
+    "@reduxjs/toolkit": "^2.0.1",
+    "axios": "^1.6.2",
+    "clsx": "^2.1.0",
+    "date-fns": "^3.0.6",
+    "dompurify": "^3.0.8",
+    "framer-motion": "^12.23.26",
+    "lucide-react": "^0.563.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.49.2",
+    "react-hot-toast": "^2.4.1",
+    "react-icons": "^5.5.0",
+    "react-redux": "^9.0.4",
+    "react-router-dom": "^6.21.1",
+    "recharts": "^2.10.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.1",
+    "@types/dompurify": "^3.0.5",
+    "@types/node": "^25.0.3",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "postcss": "^8.4.32",
+    "prettier": "^3.1.1",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vite-plugin-pwa": "^0.17.4",
+    "vitest": "^1.1.0"
+  }
+}
+
+
+=== BACKEND PACKAGE.JSON ===
+{
+  "name": "smart-budget-backend",
+  "version": "1.0.0",
+  "description": "Smart Budget API - Personal finance management with bank-level security",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [
+    "budget",
+    "finance",
+    "api",
+    "typescript",
+    "express",
+    "prisma"
+  ],
+  "author": "Jules",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^5.7.1",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "csurf": "^1.11.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.3.2",
+    "joi": "^17.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.7",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0",
+    "winston": "^3.11.0",
+    "xss": "^1.0.14",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/csurf": "^1.11.5",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.11",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.10.6",
+    "@types/nodemailer": "^6.4.14",
+    "@types/qrcode": "^1.5.6",
+    "@types/speakeasy": "^2.0.10",
+    "@types/supertest": "^6.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.1",
+    "prisma": "^5.7.1",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
+
+
+=== VITE CONFIG ===
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+import { fileURLToPath } from 'url';
+
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+      manifest: {
+        name: 'Smart Budget',
+        short_name: 'Budget',
+        description: 'Personal finance management with bank-level security',
+        theme_color: '#667eea',
+        background_color: '#ffffff',
+        display: 'standalone',
+        icons: [
+          {
+            src: '/icons/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: '/icons/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+        ],
+      },
+    }),
+  ],
+  base: mode === 'production' ? '/budget-app-v3/' : '/',
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@/components': fileURLToPath(new URL('./src/components', import.meta.url)),
+      '@/pages': fileURLToPath(new URL('./src/pages', import.meta.url)),
+      '@/hooks': fileURLToPath(new URL('./src/hooks', import.meta.url)),
+      '@/services': fileURLToPath(new URL('./src/services', import.meta.url)),
+      '@/store': fileURLToPath(new URL('./src/store', import.meta.url)),
+      '@/utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
+      '@/types': fileURLToPath(new URL('./src/types', import.meta.url)),
+    },
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
+  },
+}));
+
+
+=== PRISMA SCHEMA ===
+// Prisma schema for Smart Budget application
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  username          String    @unique
+  password          String    // bcrypt hashed
+  firstName         String?
+  lastName          String?
+  isEmailVerified   Boolean   @default(false)
+  emailVerifyToken  String?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  twoFactorSecret   String?   // encrypted
+  twoFactorEnabled  Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLogin         DateTime?
+  isActive          Boolean   @default(true)
+  failedLoginAttempts Int       @default(0)
+  lockoutUntil      DateTime?
+  
+  // Relations
+  transactions      Transaction[]
+  bankAccounts      BankAccount[]
+  categories        Category[]
+  subscriptions     Subscription[]
+  wishlistItems     WishlistItem[]
+  paymentPlans      PaymentPlan[]
+  budgets           Budget[]
+  auditLogs         AuditLog[]
+  refreshTokens     RefreshToken[]
+  adminProfile      Admin?
+  
+  @@map("users")
+  @@index([email])
+  @@index([username])
+}
+
+model Transaction {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            TransactionType
+  amount          Decimal   @db.Decimal(10, 2)
+  description     String
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  date            DateTime
+  merchant        String?
+  merchantLogo    String?
+  location        Json?     // { lat, lng, address }
+  tags            String[]
+  receiptUrl      String?
+  isRecurring     Boolean   @default(false)
+  recurringPlanId String?
+  bankAccountId   String?
+  bankAccount     BankAccount? @relation(fields: [bankAccountId], references: [id])
+  isEncrypted     Boolean   @default(false)
+  encryptedData   String?   // For E2EE
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([userId, date])
+  @@index([categoryId])
+  @@index([type])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model Category {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  type          TransactionType
+  color         String        @default("#667eea")
+  icon          String?
+  budget        Decimal?      @db.Decimal(10, 2)
+  isDefault     Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  
+  transactions  Transaction[]
+  
+  @@unique([userId, name, type])
+  @@map("categories")
+}
+
+model BankAccount {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  type            AccountType
+  bankName        String
+  accountNumber   String    // encrypted
+  balance         Decimal   @db.Decimal(10, 2)
+  currency        String    @default("EUR")
+  isSynced        Boolean   @default(false)
+  apiConnectionId String?
+  lastSyncDate    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  transactions    Transaction[]
+  
+  @@map("bank_accounts")
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  INVESTMENT
+  LOAN
+  CREDIT_CARD
+}
+
+model Subscription {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  category        String
+  amount          Decimal   @db.Decimal(10, 2)
+  frequency       SubscriptionFrequency
+  nextRenewal     DateTime
+  paymentMethod   String?
+  logo            String?
+  isActive        Boolean   @default(true)
+  autoRenewal     Boolean   @default(true)
+  notifyBefore    Int       @default(7) // days
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("subscriptions")
+}
+
+enum SubscriptionFrequency {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model WishlistItem {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  targetAmount    Decimal   @db.Decimal(10, 2)
+  currentSavings  Decimal   @db.Decimal(10, 2) @default(0)
+  category        String
+  priority        Int       @default(0)
+  imageUrl        String?
+  targetDate      DateTime?
+  isAchieved      Boolean   @default(false)
+  achievedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  savingsHistory  SavingsEntry[]
+  
+  @@map("wishlist_items")
+}
+
+model SavingsEntry {
+  id          String        @id @default(uuid())
+  wishlistId  String
+  wishlist    WishlistItem  @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  amount      Decimal       @db.Decimal(10, 2)
+  note        String?
+  createdAt   DateTime      @default(now())
+  
+  @@map("savings_entries")
+}
+
+model PaymentPlan {
+  id                String    @id @default(uuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  merchantName      String
+  totalAmount       Decimal   @db.Decimal(10, 2)
+  numberOfPayments  Int       @default(4)
+  paidAmount        Decimal   @db.Decimal(10, 2) @default(0)
+  purchaseDate      DateTime
+  paymentMethod     String
+  nextPaymentDate   DateTime
+  isCompleted       Boolean   @default(false)
+  archived          Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  payments          Payment[]
+  
+  @@map("payment_plans")
+}
+
+model Payment {
+  id          String      @id @default(uuid())
+  planId      String
+  plan        PaymentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  amount      Decimal     @db.Decimal(10, 2)
+  dueDate     DateTime
+  paidDate    DateTime?
+  isPaid      Boolean     @default(false)
+  
+  @@map("payments")
+}
+
+model Budget {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month       String    // Format: YYYY-MM
+  totalIncome Decimal   @db.Decimal(10, 2)
+  totalExpense Decimal  @db.Decimal(10, 2)
+  categories  Json      // { categoryId: budgetAmount }
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@unique([userId, month])
+  @@map("budgets")
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String
+  resource    String
+  resourceId  String?
+  ipAddress   String?
+  userAgent   String?
+  details     Json?
+  createdAt   DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+  @@index([userId])
+}
+
+model Admin {
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      AdminRole
+  createdAt DateTime  @default(now())
+  
+  @@map("admins")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+}
+
+
+=== DOCKER COMPOSE ===
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: smart-budget-db
+    environment:
+      POSTGRES_DB: budget_app
+      POSTGRES_USER: budget_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smart-budget-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U budget_user -d budget_app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: smart-budget-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - smart-budget-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smart-budget-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://budget_user:${DB_PASSWORD:-password123}@postgres:5432/budget_app?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key}
+      FRONTEND_URL: http://localhost
+      ALLOWED_ORIGINS: http://localhost,http://localhost:5173,http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - smart-budget-network
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/uploads:/app/uploads
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3000/api/v1
+    container_name: smart-budget-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - smart-budget-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  smart-budget-network:
+    driver: bridge

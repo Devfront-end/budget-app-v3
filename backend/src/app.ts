@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
@@ -15,6 +16,8 @@ import wishlistRoutes from './routes/wishlist.routes';
 import paymentPlanRoutes from './routes/paymentPlan.routes';
 import budgetRoutes from './routes/budget.routes';
 import analyticsRoutes from './routes/analytics.routes';
+import debtRatioRoutes from './routes/debtRatio.routes';
+import aiRoutes from './routes/ai.routes';
 
 dotenv.config();
 
@@ -26,6 +29,23 @@ app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost', 'http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
 }));
+
+// Global Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  standardHeaders: 'draft-7', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  message: {
+    success: false,
+    error: {
+      code: 'TOO_MANY_REQUESTS',
+      message: 'Too many requests from this IP, please try again after 15 minutes',
+    }
+  }
+});
+// Apply the rate limiting middleware to all requests.
+app.use(limiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -57,6 +77,8 @@ app.use(`${API_PREFIX}/wishlist`, wishlistRoutes);
 app.use(`${API_PREFIX}/payment-plans`, paymentPlanRoutes);
 app.use(`${API_PREFIX}/budgets`, budgetRoutes);
 app.use(`${API_PREFIX}/analytics`, analyticsRoutes);
+app.use(`${API_PREFIX}/debt-ratio`, debtRatioRoutes);
+app.use(`${API_PREFIX}/ai`, aiRoutes);
 
 // 404 handler
 app.use((req, res) => {

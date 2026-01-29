@@ -122,6 +122,11 @@ function Register() {
           Se connecter
         </Link>
       </p>
+      <div className="mt-2 text-center">
+        <Link to="/forgot-password" className="text-sm text-gray-500 hover:text-gray-700">
+          Mot de passe oublié ?
+        </Link>
+      </div>
     </div>
   );
 }

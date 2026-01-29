@@ -7,6 +7,8 @@ import AuthLayout from './components/layouts/AuthLayout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Transactions from './pages/Transactions';
 import Budgets from './pages/Budgets';
 import Categories from './pages/Categories';
@@ -14,6 +16,7 @@ import BankAccounts from './pages/BankAccounts';
 import Subscriptions from './pages/Subscriptions';
 import Wishlist from './pages/Wishlist';
 import PaymentPlans from './pages/PaymentPlans';
+import DebtRatio from './pages/DebtRatio';
 import Analytics from './pages/Analytics';
 import NotFound from './pages/NotFound';
 
@@ -28,6 +31,8 @@ function App() {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
           <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
 
         {/* Protected routes */}
@@ -40,6 +45,7 @@ function App() {
           <Route path="/subscriptions" element={<Subscriptions />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/payment-plans" element={<PaymentPlans />} />
+          <Route path="/debt-ratio" element={<DebtRatio />} />
           <Route path="/analytics" element={<Analytics />} />
         </Route>
 
