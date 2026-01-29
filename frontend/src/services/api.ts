@@ -13,9 +13,10 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // console.log(`[API] Request: ${config.method?.toUpperCase()} ${config.url}`, config.headers);
     return config;
   },
   (error) => Promise.reject(error)
@@ -41,7 +42,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Don't attempt verification refresh for login endpoint
+    // Don't attempt verification refresh for login endpoint or if already retried
     if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/login')) {
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
@@ -60,19 +61,23 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        console.log('Attempting to refresh token...');
         const response = await api.post('/auth/refresh-token'); // Cookie is sent automatically
         const { token } = response.data.data;
 
-        // Update local storage if you use it, or just use state/cookie
-        // But original interceptor used localStorage
-        localStorage.setItem('token', token); // Update stored token
+        if (token) {
+          console.log('Token refreshed successfully');
+          localStorage.setItem('token', token); // Update stored token
+          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          originalRequest.headers.Authorization = `Bearer ${token}`;
 
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-
-        processQueue(null, token);
-        return api(originalRequest);
+          processQueue(null, token);
+          return api(originalRequest);
+        } else {
+          throw new Error('No token returned from refresh');
+        }
       } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
         processQueue(refreshError, null);
         localStorage.removeItem('token');
         window.location.href = '/login';
